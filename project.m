@@ -1,0 +1,96 @@
+usersensitivity=db2pow(-120);
+ci=3;
+totalarea=450000000;
+ptin=1;
+ptout=2;
+channels=100;
+erlanguser=1/144;
+pb=0.005;
+userdensity=2;
+lamda=(3*power(10,8))/(1.8*power(10,9));
+condition1=0;
+condition2=0;
+condition3=0;
+condition4=0;
+reusein=[1 3 4 7 9 12 13];
+reuseout=[1 3 4 7 9 12 13];
+possible=[]
+cellar=[]
+totalar=[]
+reusefactor=[]
+cells=10000000000000000000000000000000000000000000000000000;
+for index1=1:7
+    for index2=1:7
+        Nin=reusein(index1)
+        Nout=reuseout(index2)
+        if(Nin<=Nout)
+            for i=1:channels
+                cin=i;
+                cout=channels-cin;
+                Ain=inverlangb(floor(cin/Nin),pb);
+                Aout=inverlangb(floor(cout/Nout),pb);
+                rin=sqrt(Ain/(userdensity*erlanguser*pi));
+                rout=sqrt((Aout+(userdensity*pi*rin*rin*erlanguser))/(2.598076211*userdensity*erlanguser));
+                psensein=ptin*power((lamda/(4*pi*rin)),2);
+                if(psensein>=usersensitivity)
+                    condition1=1
+                end
+                if(condition1==1)
+                    psenseout=ptout*power((lamda/(4*pi*rout)),2);
+                    if(psenseout>=usersensitivity)
+                        condition2=1
+                    end
+                end
+                if(condition2==1)
+                    ciout=(3*Nout)/6;
+                    if(ciout>=ci)
+                        condition3=1
+                    end
+                end
+                if(condition3==1)
+                    ciin=(3*power(rout,2)*Nin)/(6*power(rin,2));
+                    if(ciin>=ci)
+                        condition4=1;
+                        condition1=0;
+                        condition2=0;
+                        condition3=0;
+                        break;
+                    end
+                end
+                condition1=0;
+                condition2=0;
+                condition3=0;
+            end
+            if(condition4==1)
+                cellarea=2.598076211*power(rout,2);
+                possible(1,end+1)=reusein(index1);
+                possible(1,end+1)=reuseout(index2);
+                cellar(1,end+1)=cellarea;
+                totalar(1,end+1)=totalarea/cellarea;
+                if((totalarea/cellarea)<cells)
+                    cells=totalarea/cellarea
+                    finalindex1=index1;
+                    finalindex2=index2;
+                    cinfinal=cin;
+                    coutfinal=cout;
+                    rinfinal=rin;
+                    routfinal=rout;
+                end
+                condition4=0;
+            end
+        end
+    end
+end
+cells=ceil(cells)
+diameterin=2*rinfinal
+diameterout=2*routfinal
+cinfinal
+coutfinal
+position=find(min(totalar));
+for k=1:length(position)
+    reusefactor(1,end+1)=possible(1,(2*k)-1);
+    reusefactor(1,end+1)=possible(1,(2*k));
+end
+reusefactorin=reusein(finalindex1)
+reusefactorout=reuseout(finalindex2)
+reusefactor
